@@ -7,8 +7,8 @@ Sites permitidos
 
 Observações:
 
-1. Este arquivo deve ser EXECUTAVEL, não deixe o arquivo inválido
-   sob pena de perda de pontos.
+1. O arquivo =respostas.lisp= deve ser EXECUTAVEL, não deixe o arquivo
+   inválido sob pena de perda de pontos.
 
 2. Complete com seu nome completo e email usado na lista da turma.
 
