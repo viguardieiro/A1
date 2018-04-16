@@ -1,5 +1,3 @@
-
-
 ;; https://common-lisp.net/project/cl-heap/
 (ql:quickload :cl-heap)
 
@@ -111,7 +109,7 @@
 
 ;;; QUESTAO 6
 
-(defun paths (graph-as-lists s t)
+(defun paths (graph-as-lists u v)
   "<your code here>")
 
 
@@ -134,7 +132,6 @@
 
 
 ;; QUESTAO 8
-
 
 (defun questao-8 (list-of-clauses)
   "<your code here>")
