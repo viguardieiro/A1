@@ -21,7 +21,7 @@
 ;; resposta.
 
 (defun question-1 ()
-  (list 1 2 3 4 5 6))
+  (list 2 3 6 1 4 5))
 
 
 ;;; QUESTAO 2
@@ -32,15 +32,18 @@
 ;; auxiliar.
 
 (defun nlogn (guess  &optional (err (expt 3 -100)))
-  "<...>")
+  (loop for y = 1 then x
+	for x = guess then (/ (* (* 60 60) (expt 10 10)) (log x 2))
+	while (> (abs (- x y)) err)
+	finally (return x)))
 
 (defun question-2 ()
   (list :a1 (sqrt (* (expt 10 10) (* 60 60)))
-	:a2 1
-	:a3 1
-	:a4 (nlogn "<...>")
-	:a5 1
-	:a6 1))
+	:a2 (expt (* (expt 10 10) (* 60 60)) 1/3)
+	:a3 (sqrt (* (expt 10 8) (* 60 60)))
+	:a4 (nlogn-gabarito (expt 10 5))
+	:a5 (log (* (expt 10 10) (* 60 60)) 2)
+	:a6 (log (log (* (expt 10 10) (* 60 60)) 2) 2)))
 
 
 ;;; QUESTAO 3
@@ -49,7 +52,7 @@
 ;; O(n^{log_2 10}) vc iria responder:
 
 (defun question-3 (n)
-  (expt n (log 10 2)))
+  (expt n (log 3 2)))
 
 
 ;;; QUESTAO 4
@@ -66,10 +69,11 @@
 	       (merge-1 list1 (cdr list2) (cons (car list2) res))))))
 
 (defun question-4-a (list-of-lists)
-  ("<your code using merge-1>"))
+  (when list-of-lists
+      (reduce #'merge-1 list-of-lists)))
 
 (defun question-4-b (k n)
-  ("<your expression here>"))
+  (* (expt k 2) n))
 
 (defun linear-k-merge (lists)
   "Encontre o menor dos k itens (um de cada uma das listas
@@ -109,9 +113,54 @@
 
 ;;; QUESTAO 6
 
-(defun paths (graph-as-lists u v)
-  "<your code here>")
+(defclass node ()
+  ((obj     :accessor node-obj
+	    :initarg :obj)
+   (visited :accessor node-visited
+	    :initarg :visited
+	    :initform nil)
+   (nbs     :accessor node-nbs
+	    :initarg :nbs
+	    :initform nil)))
 
+
+(defun make-graph (alists &optional (test #'equal))
+  (let ((tb (make-hash-table :test test)))
+    (mapc (lambda (al)
+	    (setf (gethash (car al) tb)
+		  (make-instance 'node :obj (car al))))
+	  alists)
+    (mapcar (lambda (al)
+	      (let ((u (gethash (car al) tb)))
+		(dolist (v (cadr al))
+		  (push (gethash v tb) (node-nbs u)))
+		(setf (node-nbs u) (reverse (node-nbs u)))
+		u))
+	    alists)))
+
+
+(defun make-clocker (n)
+  (let ((clock n))
+    (lambda () (incf clock))))
+
+
+(defun explore (v clock target)
+  (loop for u in (node-nbs v) do
+       (if (equal (node-obj u) (node-obj target))
+	   (funcall clock)
+	   (explore u clock target))))
+
+(defun paths (graph-as-lists u v)
+  (let* ((node-order (mapcar #'car graph-as-lists))
+	 (graph (sort (make-graph graph-as-lists #'equal)
+		      (lambda (a b) (< (position a node-order :test #'equal)
+				       (position b node-order :test #'equal)))
+		      :key #'node-obj))
+	 (source (find u graph :test #'(lambda (x y) (equal (node-obj y) x))))
+	 (target (find v graph :test #'(lambda (x y) (equal (node-obj y) x))))
+	 (clock (make-clocker -1)))
+    (explore source clock target)
+    (funcall clock)))
 
 ;;; QUESTAO 7
 
@@ -122,13 +171,22 @@
 ;; obviamente, indica quantas antenas forma necessárias.
 
 (defun questao-7-a (casas)
-  "<your code here>")
+  (let* ((casas-ordenadas  (sort casas #'<))
+	 (primeira-antena (+ 4 (car casas-ordenadas))))
+    (cons primeira-antena (casas-aux (cdr casas-ordenadas) primeira-antena))))
+
+(defun casas-aux (casas ultima-antena)
+  (cond
+    ((null casas) nil)
+    ((<= (car casas) (+ 4 ultima-antena)) (casas-aux (cdr casas) ultima-antena))
+    (t (let ((proxima-antena (+ 4 (car casas))))
+	 (cons proxima-antena (casas-aux (cdr casas) proxima-antena))))))
 
 
 ;; abaixo, n é o número de casas
 
 (defun questao-7-b (n)
-  "<expressao complexidade em funcao de n>")
+  (n * (log n)))
 
 
 ;; QUESTAO 8
