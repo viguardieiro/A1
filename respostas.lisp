@@ -94,15 +94,32 @@
    qual ele veio. Quando uma lista esgota, o último item movido não é
    substituído e a atualização do heap não é necessária e teremos
    menos k itens."
-  "<your code using heap>")
+  (if (cdr lists)
+      (let* ((queue (make-instance 'cl-heap:priority-queue)))
+	(mapc #'(lambda (list) (cl-heap:enqueue queue (list (car list) (cdr list)) (car list))) lists)
+	(heap-aux queue))
+      (car lists)))
+
+(defun heap-aux (queue)
+  (let* ((aux (cl-heap:dequeue queue))
+	 (item (car aux))
+	 (list (cadr aux)))
+    (cond ((and (= (cl-heap:queue-size) 0) (not list)) nil)
+	  ((not list) (cons item (heap-aux queue)))
+	  (t (cl-heap:enqueue queue (list (car list) (cdr list)) (car list))
+	     (cons item (heap-aux queue))))))
 
 
-(defun dc-merge (lists)
+(defun dc-merge (lists &optional (k (length lists)))
   "Recursivamente junte as primeiras k/2 listas e junte recursivamente
    as últimas k/2 listas. Em seguida, MERGE os dois resultados. Se k =
    2 então apenas um MERGE é necessário; se k = 1, apenas devolva a
    entrada."
-  "<your divide-conquer code>")
+  (let ((middle (floor (/ k 2))))
+    (cond ((< k 2) (car lists))
+	  ((= k 2) (merge-1 (car lists) (cadr lists)))
+	  (t (merge-1 (dc-merge (subseq lists 0 middle) middle)
+		      (dc-merge (nthcdr middle lists) (- k middle)))))))
 
 
 ;;; QUESTAO 5
